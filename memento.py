@@ -1,34 +1,25 @@
-from abc import ABC, abstractmethod
-import random 
-class Memento(ABC):
-
-    @abstractmethod
-    def get_state(self) -> str:
-        pass
-
-
-class ConcreteMemento(Memento):
+import random
+class Memento:
     def __init__(self, state):
         self._state = state
 
     def get_state(self):
         return self._state
 
-class Originator():
+class Originator:
     def __init__(self, state):
         self._state = state
 
-    def do_something(self) -> None:
-        self._state = random.uniform(5,10) 
-
+    def update_state(self) -> None:
+        self._state = random.uniform(1,10) 
 
     def save(self) -> Memento:
-        return ConcreteMemento(self._state)
+        return Memento(self._state)
 
     def restore(self, memento: Memento) -> None:
         self._state = memento.get_state()
 
-class Caretaker():
+class Caretaker:
     def __init__(self, originator: Originator) -> None:
         self._mementos = []
         self._originator = originator
@@ -37,6 +28,8 @@ class Caretaker():
         self._mementos.append(self._originator.save())
 
     def undo(self) -> None:
+        print('Undo')
+        print()
         if not len(self._mementos):
             return
 
@@ -47,28 +40,29 @@ class Caretaker():
             self.undo()
 
     def show_history(self) -> None:
+        print('History')
         for memento in self._mementos:
             print(memento.get_state())
+        print()
 
+class Client:
+    def run_memento(self):
+        originator = Originator(1)
+        caretaker = Caretaker(originator)
+        caretaker.backup()
+        
+        originator.update_state()
+        caretaker.backup()
+        
+        originator.update_state()
+        caretaker.backup()
+
+        caretaker.show_history()
+        caretaker.undo()
+        caretaker.undo()
+        
+        caretaker.show_history()
 
 if __name__ == "__main__":
-    originator = Originator("Super-duper-super-puper-super.")
-    caretaker = Caretaker(originator)
-
-    caretaker.backup()
-    originator.do_something()
-
-    caretaker.backup()
-    originator.do_something()
-
-    caretaker.backup()
-    originator.do_something()
-
-    print()
-    caretaker.show_history()
-
-    print("\nClient: Now, let's rollback!\n")
-    caretaker.undo()
-
-    print("\nClient: Once more!\n")
-    caretaker.undo()
+    client = Client()
+    client.run_memento()
